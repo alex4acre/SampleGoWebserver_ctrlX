@@ -1,6 +1,7 @@
 //window.alert("Start");
 var oIntervId_500ms;
 var oIntervId_1000ms;
+var oIntervId_PLC_1000ms;
 var aGetConfiguredAxes;
 const iMaxNumOfAxes = 3;
 const sUser = "boschrexroth";
@@ -27,11 +28,45 @@ var RestGetAxisValues_3 = new XMLHttpRequest();
 var RestGetPLCOpenState_1 = new XMLHttpRequest();
 var RestGetPLCOpenState_2 = new XMLHttpRequest();
 var RestGetPLCOpenState_3 = new XMLHttpRequest();
+//PLC Data
+var RestGetbTest = new XMLHttpRequest();
+var RestGetiTest = new XMLHttpRequest();
+var RestGetrTest = new XMLHttpRequest();
+var RestPutrTest = new XMLHttpRequest();
+
 
 var RestTest = new XMLHttpRequest(); // Test
 
 // get IP address from textbox
 var oIPAddress = document.getElementById('textBox_IP_address');
+
+var oPLC3Data = document.getElementById('Panel_PLCdata_3');
+oPLC3Data.addEventListener('onchange', ackWrittenData, true);
+
+function ackWrittenData(val){
+	//alert("The input value has changed. The new value is: " + val);
+	
+	RestPutrTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/rTest", true); 
+	RestPutrTest.setRequestHeader('Content-type', 'application/json');
+	RestPutrTest.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestPutrTest.responseType = 'json';
+	let json = JSON.stringify({"value":parseFloat(val) ,"type":"float"});
+	RestPutrTest.send(json);
+
+
+	
+/*
+	let json = JSON.stringify({
+		"name":sUser,"password":sPassword
+	});
+	RestGetToken.setRequestHeader('Content-type', 'application/json');
+	RestGetToken.responseType = 'json';
+	
+	
+	// send command
+	RestGetToken.send(json);
+*/
+}
 
 
 
@@ -100,7 +135,8 @@ RestGetToken.onload = function() {
 		// Communication established, start a cyclic function
 		// start the interval (1000ms)
 		oIntervId_1000ms = setInterval(ReadCOREValues, 1000);
-			
+		oIntervId_PLC_1000ms = setInterval(ReadPLCValues, 1000);
+		
 		// read axis configuration
 		RestGetAxisConfig.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs?type=browse", true); 
 		RestGetAxisConfig.setRequestHeader('Content-type', 'application/json');
@@ -212,8 +248,8 @@ function stopInterval_500ms() {
 // Function stops the interval
 function stopInterval_1000ms() {
     clearInterval(oIntervId_1000ms); 
+	clearInterval(oIntervId_PLC_1000ms);
 }
-
 
 function ReadAxisValues(aAxes){
 	
@@ -304,6 +340,29 @@ function ReadCOREValues(){
 	RestGetMotion_State.send();
 	
 }
+
+function ReadPLCValues(){
+	
+	// execute several REST commands
+	RestGetbTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/bTest", true); 
+	RestGetbTest.setRequestHeader('Content-type', 'application/json');
+	RestGetbTest.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestGetbTest.responseType = 'json';
+	RestGetbTest.send();
+
+	RestGetiTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/iTest", true); 
+	RestGetiTest.setRequestHeader('Content-type', 'application/json');
+	RestGetiTest.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestGetiTest.responseType = 'json';
+	RestGetiTest.send();
+
+	RestGetrTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/rTest", true); 
+	RestGetrTest.setRequestHeader('Content-type', 'application/json');
+	RestGetrTest.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestGetrTest.responseType = 'json';
+	RestGetrTest.send();
+}
+
 
 
 
@@ -530,6 +589,49 @@ RestGetCORE_CPU_Util.onload  = function() {
   }
 };
 
+
+RestGetbTest.onload  = function() {
+	// copy response object
+	myObj = RestGetbTest;//RestGetCORE_CPU_Mem;
+	if (myObj.status == 200) { // HTTP successfull response
+	  // update the webpage with data from the CORE
+	  let PLCData_1  = document.getElementById('Panel_PLCdata_1'); 
+	  PLCData_1.innerHTML = myObj.response.value;
+	} else { // HTTP error
+	  // handle error
+	  window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	  stopInterval_1000ms();
+	}
+  };
+
+RestGetiTest.onload  = function() {
+	// copy response object
+	myObj = RestGetiTest;//RestGetCORE_CPU_Mem;
+	if (myObj.status == 200) { // HTTP successfull response
+	  // update the webpage with data from the CORE
+	  let PLCData_2  = document.getElementById('Panel_PLCdata_2'); 
+	  PLCData_2.innerHTML = myObj.response.value;
+	} else { // HTTP error
+	  // handle error
+	  window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	  stopInterval_1000ms();
+	}
+};
+ 
+RestGetrTest.onload  = function() {
+	// copy response object
+	myObj = RestGetrTest;//RestGetCORE_CPU_Mem;
+	if (myObj.status == 200) { // HTTP successfull response
+	  // update the webpage with data from the CORE
+	  let PLCData_3  = document.getElementById('Panel_PLCdata_3'); 
+	  PLCData_3.value = myObj.response.value.toFixed(3);
+	} else { // HTTP error
+	  // handle error
+	  window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	  stopInterval_1000ms();
+	}
+};
+ 
 
 RestGetCORE_CPU_Mem.onload  = function() {
 	

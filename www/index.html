@@ -164,7 +164,74 @@
 			</div>
 		</div>
 		
+		<div class="row" id="PLC_Data">
+			<div class="col-md-8">
+				<div class="h-auto my-3 p-3 bg-white rounded shadow-sm">
+				
+					<div class="row" style="padding-left: 15px;">
+					
+						<!-- symbol	-->
+						<svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-gear" fill="currentColor">
+						  <path fill-rule="evenodd" d="M8.837 1.626c-.246-.835-1.428-.835-1.674 0l-.094.319A1.873 1.873 0 0 1 4.377 3.06l-.292-.16c-.764-.415-1.6.42-1.184 1.185l.159.292a1.873 1.873 0 0 1-1.115 2.692l-.319.094c-.835.246-.835 1.428 0 1.674l.319.094a1.873 1.873 0 0 1 1.115 2.693l-.16.291c-.415.764.42 1.6 1.185 1.184l.292-.159a1.873 1.873 0 0 1 2.692 1.116l.094.318c.246.835 1.428.835 1.674 0l.094-.319a1.873 1.873 0 0 1 2.693-1.115l.291.16c.764.415 1.6-.42 1.184-1.185l-.159-.291a1.873 1.873 0 0 1 1.116-2.693l.318-.094c.835-.246.835-1.428 0-1.674l-.319-.094a1.873 1.873 0 0 1-1.115-2.692l.16-.292c.415-.764-.42-1.6-1.185-1.184l-.291.159A1.873 1.873 0 0 1 8.93 1.945l-.094-.319zm-2.633-.283c.527-1.79 3.065-1.79 3.592 0l.094.319a.873.873 0 0 0 1.255.52l.292-.16c1.64-.892 3.434.901 2.54 2.541l-.159.292a.873.873 0 0 0 .52 1.255l.319.094c1.79.527 1.79 3.065 0 3.592l-.319.094a.873.873 0 0 0-.52 1.255l.16.292c.893 1.64-.902 3.434-2.541 2.54l-.292-.159a.873.873 0 0 0-1.255.52l-.094.319c-.527 1.79-3.065 1.79-3.592 0l-.094-.319a.873.873 0 0 0-1.255-.52l-.292.16c-1.64.893-3.433-.902-2.54-2.541l.159-.292a.873.873 0 0 0-.52-1.255l-.319-.094c-1.79-.527-1.79-3.065 0-3.592l.319-.094a.873.873 0 0 0 .52-1.255l-.16-.292c-.892-1.64.902-3.433 2.541-2.54l.292.159a.873.873 0 0 0 1.255-.52l.094-.319z"/>
+						  <path fill-rule="evenodd" d="M8 5.754a2.246 2.246 0 1 0 0 4.492 2.246 2.246 0 0 0 0-4.492zM4.754 8a3.246 3.246 0 1 1 6.492 0 3.246 3.246 0 0 1-6.492 0z"/>
+						</svg>
+						
+						<!-- text -->
+						<h6 class="pl-3 pb-0 md-2" id="Text_PLC_Data">PLC Data</h6>
+						
+					</div>	
+					
+					<!-- line -->
+					<h6 class="border-bottom border-gray pb-2 mb-0"></h6> 
+					
+					
+					<div class="row col-md-12 pt-3 ml-1">
 	
+						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
+							<div class="card-header">
+								bTest
+							</div>
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item text-dark" id="Panel_PLCdata_1">t.e. 192.4 mm</li>
+							</ul>
+						</li>
+						
+						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
+							<div class="card-header">
+								iTest
+							</div>
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item text-dark" id="Panel_PLCdata_2">t.e. 10 mm/min</li>
+							</ul>
+						</li>
+						
+						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
+							<div class="card-header">
+								rTest
+							</div>
+								<input class="form-control mb-3 mr-3" type="text" id="Panel_PLCdata_3" style="width: 9rem;" value="rTest"  onchange="ackWrittenData(this.value)">
+							<!--
+							<ul class="list-group list-group-flush">
+								<input class="form-control mb-3 mr-3" type="text" id="textBox_IP_address" style="width: 10rem;" value="localhost:8443">
+								<li class="list-group-item text-dark" id="Panel_PLCdata_3">t.e. 90 %</li>
+							</ul>-->
+						</li>
+						
+						
+						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
+							<div class="card-header">
+								Distance Left
+							</div>
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item text-dark" id="Panel_PLCdata_4">t.e. 9.314 mm</li>
+							</ul>
+						</li>
+						
+					</div>
+				</div>	
+			</div>		
+		</div>	
+			
 	
 		<div class="row" id="Card_Axis_1">
 			<div class="col-md-8">
