@@ -18,7 +18,7 @@
         "id": "webserver",
         "target": "_blank",
         "title": "Your Webserver", 
-        "icon": "Bosch-Ic-worldwideweb",
+        "icon": "bosch-ic-worldwideweb",
         "link": "/your-webserver/" 
       }
     ],
@@ -29,7 +29,7 @@
         "id": "webserver",
         "target": "_blank",
         "title": "Your Webserver",
-        "icon": "Bosch-Ic-worldwideweb",
+        "icon": "bosch-ic-worldwideweb",
         "link": "/your-webserver/"
       }
     ]    
