@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="">
 
-    <title> Test the REST of ctrlX AUTOMATION</title>
+    <title> Your Sample ctrlX Web Site </title>
 
 	<!-- Bootstrap core CSS -->
 	<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -17,6 +17,8 @@
     <link href="css/sticky-footer-navbar.css" rel="stylesheet">
     <link href="css/offcanvas.css" rel="stylesheet">
 	<link href="carousel.css" rel="stylesheet">
+
+	<link href="css/sliderButton.css" rel="stylesheet">
 	
   </head>
   
@@ -188,45 +190,32 @@
 					<div class="row col-md-12 pt-3 ml-1">
 	
 						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
-							<div class="card-header">
-								bTest
-							</div>
+							<!--<div class="card-header">
+								Bool
+							</div>-->
+							<!-- Rounded switch -->
+							<label class="switch">
+								<input type="checkbox" checked id="Panel_BoolPLCData" style="width: 10rem" onclick="WriteBoolData(this);"> 
+								<span class="slider round"></span>
+							</label>
 							<ul class="list-group list-group-flush">
-								<li class="list-group-item text-dark" id="Panel_PLCdata_1">t.e. 192.4 mm</li>
+								<li class="list-group-item text-dark" id="Panel_PLCdata_1">bool8</li>
 							</ul>
+						</li>
+
+						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
+							<div class="card-header">
+								Integer 
+							</div>
+								<input class="form-control mb-3 mr-3" type="text" id="Panel_PLCdata_2" style="width: 10rem;" value="integer"  onchange="WriteIntData(this.value);" onfocus="LockRead();" onblur="unLockRead();" >
 						</li>
 						
 						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
 							<div class="card-header">
-								iTest
+								Float
 							</div>
-							<ul class="list-group list-group-flush">
-								<li class="list-group-item text-dark" id="Panel_PLCdata_2">t.e. 10 mm/min</li>
-							</ul>
+								<input class="form-control mb-3 mr-3" type="text" id="Panel_PLCdata_3" style="width: 10rem;" value="float"  onchange="WriteFloatData(this.value);" onfocus="LockRead();" onblur="unLockRead();" > 
 						</li>
-						
-						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
-							<div class="card-header">
-								rTest
-							</div>
-								<input class="form-control mb-3 mr-3" type="text" id="Panel_PLCdata_3" style="width: 9rem;" value="rTest"  onchange="ackWrittenData(this.value)">
-							<!--
-							<ul class="list-group list-group-flush">
-								<input class="form-control mb-3 mr-3" type="text" id="textBox_IP_address" style="width: 10rem;" value="localhost:8443">
-								<li class="list-group-item text-dark" id="Panel_PLCdata_3">t.e. 90 %</li>
-							</ul>-->
-						</li>
-						
-						
-						<li class="card text-white bg-success mb-3 mr-3" style="width: 10rem;">
-							<div class="card-header">
-								Distance Left
-							</div>
-							<ul class="list-group list-group-flush">
-								<li class="list-group-item text-dark" id="Panel_PLCdata_4">t.e. 9.314 mm</li>
-							</ul>
-						</li>
-						
 					</div>
 				</div>	
 			</div>		

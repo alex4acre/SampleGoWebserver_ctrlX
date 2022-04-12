@@ -33,39 +33,62 @@ var RestGetbTest = new XMLHttpRequest();
 var RestGetiTest = new XMLHttpRequest();
 var RestGetrTest = new XMLHttpRequest();
 var RestPutrTest = new XMLHttpRequest();
+var RestPutiTest = new XMLHttpRequest();
+var RestPutbTest = new XMLHttpRequest();
 
+let bLockRead = false;
 
 var RestTest = new XMLHttpRequest(); // Test
 
 // get IP address from textbox
 var oIPAddress = document.getElementById('textBox_IP_address');
 
-var oPLC3Data = document.getElementById('Panel_PLCdata_3');
-oPLC3Data.addEventListener('onchange', ackWrittenData, true);
+//var oPLC3Data = document.getElementById('Panel_PLCdata_3');
+//oPLC3Data.addEventListener('onchange', ackWrittenData, true);
 
-function ackWrittenData(val){
-	//alert("The input value has changed. The new value is: " + val);
-	
+function LockRead(){
+	bLockRead = true;
+}
+
+function unLockRead(){
+	bLockRead = false;
+}
+
+
+function WriteFloatData(val){
 	RestPutrTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/rTest", true); 
 	RestPutrTest.setRequestHeader('Content-type', 'application/json');
 	RestPutrTest.setRequestHeader('Authorization', "Bearer " + xToken);
 	RestPutrTest.responseType = 'json';
 	let json = JSON.stringify({"value":parseFloat(val) ,"type":"float"});
 	RestPutrTest.send(json);
+	bLockRead = false;
+}
 
+function WriteIntData(val){
+	RestPutiTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/iTest", true); 
+	RestPutiTest.setRequestHeader('Content-type', 'application/json');
+	RestPutiTest.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestPutiTest.responseType = 'json';
+	let json = JSON.stringify({"value":parseInt(val) ,"type":"int16"});
+	RestPutiTest.send(json);
+	bLockRead = false;
+}
 
-	
-/*
-	let json = JSON.stringify({
-		"name":sUser,"password":sPassword
-	});
-	RestGetToken.setRequestHeader('Content-type', 'application/json');
-	RestGetToken.responseType = 'json';
-	
-	
-	// send command
-	RestGetToken.send(json);
-*/
+function WriteBoolData(val){
+	RestPutbTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/bTest", true); 
+	RestPutbTest.setRequestHeader('Content-type', 'application/json');
+	RestPutbTest.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestPutbTest.responseType = 'json';
+	let json = JSON.stringify({"value":true ,"type":"bool8"});
+	if (val.checked){
+		json = JSON.stringify({"value":true,"type":"bool8"});
+	}
+	else{
+		json = JSON.stringify({"value":false,"type":"bool8"});
+	}
+	RestPutbTest.send(json);
+	bLockRead = false;
 }
 
 
@@ -342,7 +365,7 @@ function ReadCOREValues(){
 }
 
 function ReadPLCValues(){
-	
+	if (!bLockRead){
 	// execute several REST commands
 	RestGetbTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/bTest", true); 
 	RestGetbTest.setRequestHeader('Content-type', 'application/json');
@@ -361,6 +384,7 @@ function ReadPLCValues(){
 	RestGetrTest.setRequestHeader('Authorization', "Bearer " + xToken);
 	RestGetrTest.responseType = 'json';
 	RestGetrTest.send();
+	}
 }
 
 
@@ -591,45 +615,51 @@ RestGetCORE_CPU_Util.onload  = function() {
 
 
 RestGetbTest.onload  = function() {
-	// copy response object
-	myObj = RestGetbTest;//RestGetCORE_CPU_Mem;
-	if (myObj.status == 200) { // HTTP successfull response
-	  // update the webpage with data from the CORE
-	  let PLCData_1  = document.getElementById('Panel_PLCdata_1'); 
-	  PLCData_1.innerHTML = myObj.response.value;
-	} else { // HTTP error
-	  // handle error
-	  window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-	  stopInterval_1000ms();
-	}
+
+		// copy response object
+		myObj = RestGetbTest;//RestGetCORE_CPU_Mem;
+		if (myObj.status == 200) { // HTTP successfull response
+		// update the webpage with data from the CORE
+		let PLCData_1  = document.getElementById('Panel_PLCdata_1'); 
+		PLCData_1.innerHTML = myObj.response.value;
+		} else { // HTTP error
+		// handle error
+		window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+		stopInterval_1000ms();
+		}
+
   };
 
 RestGetiTest.onload  = function() {
-	// copy response object
-	myObj = RestGetiTest;//RestGetCORE_CPU_Mem;
-	if (myObj.status == 200) { // HTTP successfull response
-	  // update the webpage with data from the CORE
-	  let PLCData_2  = document.getElementById('Panel_PLCdata_2'); 
-	  PLCData_2.innerHTML = myObj.response.value;
-	} else { // HTTP error
-	  // handle error
-	  window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-	  stopInterval_1000ms();
-	}
+
+		// copy response object
+		myObj = RestGetiTest;//RestGetCORE_CPU_Mem;
+		if (myObj.status == 200) { // HTTP successfull response
+		// update the webpage with data from the CORE
+		let PLCData_2  = document.getElementById('Panel_PLCdata_2'); 
+		PLCData_2.value = myObj.response.value;
+		} else { // HTTP error
+		// handle error
+		window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+		stopInterval_1000ms();
+		}
+
 };
  
 RestGetrTest.onload  = function() {
-	// copy response object
-	myObj = RestGetrTest;//RestGetCORE_CPU_Mem;
-	if (myObj.status == 200) { // HTTP successfull response
-	  // update the webpage with data from the CORE
-	  let PLCData_3  = document.getElementById('Panel_PLCdata_3'); 
-	  PLCData_3.value = myObj.response.value.toFixed(3);
-	} else { // HTTP error
-	  // handle error
-	  window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-	  stopInterval_1000ms();
-	}
+
+		// copy response object
+		myObj = RestGetrTest;//RestGetCORE_CPU_Mem;
+		if (myObj.status == 200) { // HTTP successfull response
+		// update the webpage with data from the CORE
+		let PLCData_3  = document.getElementById('Panel_PLCdata_3'); 
+		PLCData_3.value = myObj.response.value.toFixed(3);
+		} else { // HTTP error
+		// handle error
+		window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+		stopInterval_1000ms();
+		}
+
 };
  
 
