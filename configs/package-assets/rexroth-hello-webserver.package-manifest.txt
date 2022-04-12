@@ -4,8 +4,8 @@
   "services": {
     "proxyMapping": [
       {
-        "name": "your-webserver", 
-        "url": "/your-webserver/", 
+        "name": "your-webserver", //"hello-webserver",
+        "url": "/your-webserver/", //"/hello-webserver/",
         "binding": "unix://{$SNAP_DATA}/package-run/rexroth-hello-webserver/web.sock",
         "restricted": [
         ]        
@@ -17,9 +17,9 @@
       {
         "id": "webserver",
         "target": "_blank",
-        "title": "Your Webserver", 
+        "title": "Your Webserver", //"Hello-Webserver",
         "icon": "Bosch-Ic-worldwideweb",
-        "link": "/your-webserver/" 
+        "link": "/your-webserver/" //"/hello-webserver/"
       }
     ],
     "settings": [
@@ -28,9 +28,9 @@
       {
         "id": "webserver",
         "target": "_blank",
-        "title": "Your Webserver",
+        "title": "Your Webserver", //"Hello-Webserver","Hello-Webserver",
         "icon": "Bosch-Ic-worldwideweb",
-        "link": "/your-webserver/"
+        "link": "/your-webserver/" //"/hello-webserver/"
       }
     ]    
   }

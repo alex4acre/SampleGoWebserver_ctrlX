@@ -34,7 +34,8 @@ func main() {
 	}
 
 	// Create http handle
-	http.Handle("/hello-webserver/", http.StripPrefix("/hello-webserver/", http.FileServer(http.Dir(www))))
+	//http.Handle("/hello-webserver/", http.StripPrefix("/hello-webserver/", http.FileServer(http.Dir(www))))
+	http.Handle("/your-webserver/", http.StripPrefix("/your-webserver/", http.FileServer(http.Dir(www))))
 
 	// Differentiate between app is snapped (-> unix sockets) and app is running external (-> tcp)
 	if snapped {
