@@ -23,29 +23,10 @@ func main() {
 	www := ""
 	snapped := false
 	// change commonpath if app is not running as a snap
-	if _, snapped = os.LookupEnv("SNAP"); !snapped {
-		fmt.Printf("App is running as external Application (Debug)")
-//		dir, _ := os.Getwd()
-//		www = filepath.FromSlash(filepath.Join(filepath.Dir(dir), "www"))
-	} else {
-		fmt.Printf("App is running as snap inside ctrlX")
-//		www = filepath.FromSlash(filepath.Join(os.Getenv("SNAP"), "www"))
-	}
+	_, snapped = os.LookupEnv("SNAP"); 
 
-	// Check if directory exist
-/*	fmt.Printf("Check if serve path exist: %s \n", www)
-	if _, err := os.Stat(www); os.IsNotExist(err) {
-		// If directory not exist, cancel operation because nothing to serve
-		fmt.Printf("Serve path does not exist \n")
-		log.Fatalf("Nothing to serve")
-	} else {
-		fmt.Printf("Common-Path exist \n")
-	}*/
-
-//	Dir(www, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")*/
 	www = "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www";
 	// Create http handle
-	//http.Handle("/hello-webserver/", http.StripPrefix("/hello-webserver/", http.FileServer(http.Dir(www))))
 	http.Handle("/your-webserver/", http.StripPrefix("/your-webserver/", http.FileServer(http.Dir(www))))
 
 	// Differentiate between app is snapped (-> unix sockets) and app is running external (-> tcp)
