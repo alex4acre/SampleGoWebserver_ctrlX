@@ -35,6 +35,11 @@ var RestGetrTest = new XMLHttpRequest();
 var RestPutrTest = new XMLHttpRequest();
 var RestPutiTest = new XMLHttpRequest();
 var RestPutbTest = new XMLHttpRequest();
+//USB Data
+var RestGetUSBID_Unmount = new XMLHttpRequest();
+var RestGetUSBID_Mount = new XMLHttpRequest();
+var RestMountUSB = new XMLHttpRequest();
+var RestUnmountUSB = new XMLHttpRequest();
 
 let bLockRead = false;
 
@@ -54,6 +59,48 @@ function unLockRead(){
 	bLockRead = false;
 }
 
+function GetUSBID_Mount(){
+	RestGetUSBID_Mount.open("GET", "https://" + strIPAddress + "/storage/api/v1/media", true); 
+	RestGetUSBID_Mount.setRequestHeader('Content-type', 'application/json');
+	RestGetUSBID_Mount.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestGetUSBID_Mount.responseType = 'json';
+	RestGetUSBID_Mount.send();
+}
+
+	RestGetUSBID_Mount.onload  = function() {
+	
+		myObj = RestGetUSBID_Mount;	
+		// update the webpage with data from the axis status
+		alert(myObj.response[0].uuid);
+		RestMountUSB.open("POST", "https://" + strIPAddress + "/storage/api/v1/tasks", true); 
+		RestMountUSB.setRequestHeader('Content-type', 'application/json');
+		RestMountUSB.setRequestHeader('Authorization', "Bearer " + xToken);
+		RestMountUSB.responseType = 'json';
+		let json = JSON.stringify({"action": "mount","parameters": {"media": "64B0-B20B", "assignment":"data-exchange"}});
+		RestMountUSB.send(json);
+  };
+
+  function GetUSBID_Unmount(){
+	RestGetUSBID_Unmount.open("GET", "https://" + strIPAddress + "/storage/api/v1/media", true); 
+	RestGetUSBID_Unmount.setRequestHeader('Content-type', 'application/json');
+	RestGetUSBID_Unmount.setRequestHeader('Authorization', "Bearer " + xToken);
+	RestGetUSBID_Unmount.responseType = 'json';
+	RestGetUSBID_Unmount.send();
+}
+
+	RestGetUSBID_Unmount.onload  = function() {
+		myObj = RestGetUSBID_Unmount;	
+		// update the webpage with data from the axis status
+		alert(myObj.response[0].uuid);
+		RestUnmountUSB.open("POST", "https://" + strIPAddress + "/storage/api/v1/tasks", true); 
+		RestUnmountUSB.setRequestHeader('Content-type', 'application/json');
+		RestUnmountUSB.setRequestHeader('Authorization', "Bearer " + xToken);
+		RestUnmountUSB.responseType = 'json';
+		let json = JSON.stringify({"action": "unmount","parameters": {"media": "64B0-B20B"}});
+		RestUnmountUSB.send(json);
+  };
+
+  
 
 function WriteFloatData(val){
 	RestPutrTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/rTest", true); 

@@ -7,9 +7,34 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"path"
+	"io/ioutil"
+	"io"
 )
 
 func main() {
+
+	/*create a simple file path on the controller*/
+	//Create a folder/directory at a full qualified path
+    err := os.MkdirAll("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", os.ModePerm)
+    if err != nil {
+        log.Fatal(err)
+    }
+	
+	/*err = os.Mkdir("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", 0777)
+    if err != nil {
+        log.Fatal(err)
+    }*/
+
+	file, err := os.Create("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www/test.txt")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer file.Close()
+    linesToWrite := []string{"This is an example", "to show how", "to write to a file", "line by line."}
+    for _, line := range linesToWrite {
+        file.WriteString(line + "\n")
+    }
 
 	www := ""
 	snapped := false
@@ -33,6 +58,8 @@ func main() {
 		fmt.Printf("Common-Path exist \n")
 	}
 
+	Dir(www, "var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")
+	
 	// Create http handle
 	//http.Handle("/hello-webserver/", http.StripPrefix("/hello-webserver/", http.FileServer(http.Dir(www))))
 	http.Handle("/your-webserver/", http.StripPrefix("/your-webserver/", http.FileServer(http.Dir(www))))
@@ -68,4 +95,64 @@ func main() {
 		http.Serve(tcpListener, nil)
 	}
 
+}
+
+// Dir copies a whole directory recursively
+func Dir(src string, dst string) error {
+	var err error
+	var fds []os.FileInfo
+	var srcinfo os.FileInfo
+
+	if srcinfo, err = os.Stat(src); err != nil {
+		return err
+	}
+
+	if err = os.MkdirAll(dst, srcinfo.Mode()); err != nil {
+		return err
+	}
+
+	if fds, err = ioutil.ReadDir(src); err != nil {
+		return err
+	}
+	for _, fd := range fds {
+		srcfp := path.Join(src, fd.Name())
+		dstfp := path.Join(dst, fd.Name())
+
+		if fd.IsDir() {
+			if err = Dir(srcfp, dstfp); err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			if err = File(srcfp, dstfp); err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	return nil
+}
+
+// File copies a single file from src to dst
+func File(src, dst string) error {
+	var err error
+	var srcfd *os.File
+	var dstfd *os.File
+	var srcinfo os.FileInfo
+
+	if srcfd, err = os.Open(src); err != nil {
+		return err
+	}
+	defer srcfd.Close()
+
+	if dstfd, err = os.Create(dst); err != nil {
+		return err
+	}
+	defer dstfd.Close()
+
+	if _, err = io.Copy(dstfd, srcfd); err != nil {
+		return err
+	}
+	if srcinfo, err = os.Stat(src); err != nil {
+		return err
+	}
+	return os.Chmod(dst, srcinfo.Mode())
 }
