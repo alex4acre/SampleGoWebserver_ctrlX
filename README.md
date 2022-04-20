@@ -1,8 +1,8 @@
-# Example hello.webserver
+# Example GoWebserver
 
-The sample __hello-webserver__ contains simple webserver.
-
-## Indroduction
+The sample __GoWebserver__ contains simple webserver that can be loaded and modifed from the ctrlX text based IDE. The changes made in the IDE are immediate. 
+The sample website source is found on the ctrlX forum here: https://developer.community.boschrexroth.com/t5/SDK/Webserver-communication-with-CtrlX-Core/m-p/19243/highlight/true#M36
+## Introduction
 
 
 ## Pre-requisites
@@ -15,7 +15,9 @@ The sample __hello-webserver__ contains simple webserver.
 1. Launch Visual Studio Code
 2. Open the sample directory `samples-go/hello-webserver`
 3. Build and install the snap as described in `Setup` section
-4. Check output in the web interface
+4. Load the WebServer directory from the ctrlX SDK 
+5. Check output in the web interface
+6. Modify the web interface directly from the IDE
 
 ## Detailed Informations 
 
