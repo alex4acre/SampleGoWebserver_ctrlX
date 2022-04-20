@@ -1,0 +1,1 @@
+Source for the www files: https://developer.community.boschrexroth.com/t5/SDK/Webserver-communication-with-CtrlX-Core/m-p/19243/highlight/true#M36

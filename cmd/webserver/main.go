@@ -14,8 +14,7 @@ import (
 
 func main() {
 
-	/*create a simple file path on the controller*/
-	//Create a folder/directory at a full qualified path
+	//Create a folder/directory at a full qualified path for the website
     err := os.MkdirAll("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", os.ModePerm)
     if err != nil {
         log.Fatal(err)
@@ -26,24 +25,24 @@ func main() {
 	// change commonpath if app is not running as a snap
 	if _, snapped = os.LookupEnv("SNAP"); !snapped {
 		fmt.Printf("App is running as external Application (Debug)")
-		dir, _ := os.Getwd()
-		www = filepath.FromSlash(filepath.Join(filepath.Dir(dir), "www"))
+//		dir, _ := os.Getwd()
+//		www = filepath.FromSlash(filepath.Join(filepath.Dir(dir), "www"))
 	} else {
 		fmt.Printf("App is running as snap inside ctrlX")
-		www = filepath.FromSlash(filepath.Join(os.Getenv("SNAP"), "www"))
+//		www = filepath.FromSlash(filepath.Join(os.Getenv("SNAP"), "www"))
 	}
 
 	// Check if directory exist
-	fmt.Printf("Check if serve path exist: %s \n", www)
+/*	fmt.Printf("Check if serve path exist: %s \n", www)
 	if _, err := os.Stat(www); os.IsNotExist(err) {
 		// If directory not exist, cancel operation because nothing to serve
 		fmt.Printf("Serve path does not exist \n")
 		log.Fatalf("Nothing to serve")
 	} else {
 		fmt.Printf("Common-Path exist \n")
-	}
+	}*/
 
-	Dir(www, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")
+//	Dir(www, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")*/
 	www = "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www";
 	// Create http handle
 	//http.Handle("/hello-webserver/", http.StripPrefix("/hello-webserver/", http.FileServer(http.Dir(www))))
