@@ -20,21 +20,6 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-	
-	/*err = os.Mkdir("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", 0777)
-    if err != nil {
-        log.Fatal(err)
-    }*/
-
-	file, err := os.Create("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www/test.txt")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    linesToWrite := []string{"This is an example", "to show how", "to write to a file", "line by line."}
-    for _, line := range linesToWrite {
-        file.WriteString(line + "\n")
-    }
 
 	www := ""
 	snapped := false
@@ -58,8 +43,8 @@ func main() {
 		fmt.Printf("Common-Path exist \n")
 	}
 
-	Dir(www, "var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")
-	
+	Dir(www, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")
+	www = "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www";
 	// Create http handle
 	//http.Handle("/hello-webserver/", http.StripPrefix("/hello-webserver/", http.FileServer(http.Dir(www))))
 	http.Handle("/your-webserver/", http.StripPrefix("/your-webserver/", http.FileServer(http.Dir(www))))
