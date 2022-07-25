@@ -10,7 +10,6 @@ var oConnectionTimeout;
 const iConnectionTimeout_ms = 2000; // connection timeout in [ms]
 var strIPAddress;
 
-
 // the next objects can be used to request data from a web server
 // get more information here: https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
 // CORE data
@@ -40,16 +39,64 @@ var RestGetUSBID_Unmount = new XMLHttpRequest();
 var RestGetUSBID_Mount = new XMLHttpRequest();
 var RestMountUSB = new XMLHttpRequest();
 var RestUnmountUSB = new XMLHttpRequest();
+var RestUSBPath = new XMLHttpRequest();
+//controlling back up and restore
+var RestBackupRecipe = new XMLHttpRequest();
+var RestRestoreRecipe = new XMLHttpRequest();
+var RestBackupApp = new XMLHttpRequest();
+var RestRestoreApp = new XMLHttpRequest();
+
 
 let bLockRead = false;
 
 var RestTest = new XMLHttpRequest(); // Test
 
+var strIPAddress = location.host;
+    //alert(strIPAddress);
+
+FC_Connect();
+var memUsage = 0;
+var CPUData = [];
+var MEMData = [];
+let newDataTicks = 0;
+ const ctx = document.getElementById('myChart');
+    const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'CPU', 
+            data: CPUData,
+            backgroundColor: [
+                'rgba(6,203,251, 0.2)'
+            ],
+            borderColor: [
+                'rgba(4,92,132,1)'
+            ],
+            borderWidth: 1
+        }, {
+            label: 'Mem', 
+            data: MEMData,
+            backgroundColor: [
+                'rgba(185,202,212,0.2)'
+            ],
+            borderColor: [
+                'rgba(92,124,148)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
 // get IP address from textbox
 var oIPAddress = document.getElementById('textBox_IP_address');
-
-//var oPLC3Data = document.getElementById('Panel_PLCdata_3');
-//oPLC3Data.addEventListener('onchange', ackWrittenData, true);
 
 function LockRead(){
 	bLockRead = true;
@@ -59,105 +106,24 @@ function unLockRead(){
 	bLockRead = false;
 }
 
-function GetUSBID_Mount(){
-	RestGetUSBID_Mount.open("GET", "https://" + strIPAddress + "/storage/api/v1/media", true); 
-	RestGetUSBID_Mount.setRequestHeader('Content-type', 'application/json');
-	RestGetUSBID_Mount.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetUSBID_Mount.responseType = 'json';
-	RestGetUSBID_Mount.send();
-}
-
-	RestGetUSBID_Mount.onload  = function() {
-	
-		myObj = RestGetUSBID_Mount;	
-		// update the webpage with data from the axis status
-		alert(myObj.response[0].uuid);
-		RestMountUSB.open("POST", "https://" + strIPAddress + "/storage/api/v1/tasks", true); 
-		RestMountUSB.setRequestHeader('Content-type', 'application/json');
-		RestMountUSB.setRequestHeader('Authorization', "Bearer " + xToken);
-		RestMountUSB.responseType = 'json';
-		let json = JSON.stringify({"action": "mount","parameters": {"media": "64B0-B20B", "assignment":"data-exchange"}});
-		RestMountUSB.send(json);
-  };
-
-  function GetUSBID_Unmount(){
-	RestGetUSBID_Unmount.open("GET", "https://" + strIPAddress + "/storage/api/v1/media", true); 
-	RestGetUSBID_Unmount.setRequestHeader('Content-type', 'application/json');
-	RestGetUSBID_Unmount.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetUSBID_Unmount.responseType = 'json';
-	RestGetUSBID_Unmount.send();
-}
-
-	RestGetUSBID_Unmount.onload  = function() {
-		myObj = RestGetUSBID_Unmount;	
-		// update the webpage with data from the axis status
-		alert(myObj.response[0].uuid);
-		RestUnmountUSB.open("POST", "https://" + strIPAddress + "/storage/api/v1/tasks", true); 
-		RestUnmountUSB.setRequestHeader('Content-type', 'application/json');
-		RestUnmountUSB.setRequestHeader('Authorization', "Bearer " + xToken);
-		RestUnmountUSB.responseType = 'json';
-		let json = JSON.stringify({"action": "unmount","parameters": {"media": "64B0-B20B"}});
-		RestUnmountUSB.send(json);
-  };
-
-  
-
-function WriteFloatData(val){
-	RestPutrTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/rTest", true); 
-	RestPutrTest.setRequestHeader('Content-type', 'application/json');
-	RestPutrTest.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestPutrTest.responseType = 'json';
-	let json = JSON.stringify({"value":parseFloat(val) ,"type":"float"});
-	RestPutrTest.send(json);
-	bLockRead = false;
-}
-
-function WriteIntData(val){
-	RestPutiTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/iTest", true); 
-	RestPutiTest.setRequestHeader('Content-type', 'application/json');
-	RestPutiTest.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestPutiTest.responseType = 'json';
-	let json = JSON.stringify({"value":parseInt(val) ,"type":"int16"});
-	RestPutiTest.send(json);
-	bLockRead = false;
-}
-
-function WriteBoolData(val){
-	RestPutbTest.open("PUT", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/bTest", true); 
-	RestPutbTest.setRequestHeader('Content-type', 'application/json');
-	RestPutbTest.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestPutbTest.responseType = 'json';
-	let json = JSON.stringify({"value":true ,"type":"bool8"});
-	if (val.checked){
-		json = JSON.stringify({"value":true,"type":"bool8"});
-	}
-	else{
-		json = JSON.stringify({"value":false,"type":"bool8"});
-	}
-	RestPutbTest.send(json);
-	bLockRead = false;
-}
-
-
 
 //-------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------
 
 // Button Connect
-var oConnect  = document.getElementById('BtnConnect');
-oConnect.addEventListener ('click', FC_Connect, true);
+//var oConnect  = document.getElementById('BtnConnect');
+//oConnect.addEventListener ('click', FC_Connect, true);
 
 function FC_Connect() {
-	
-	//copy ip address
-	strIPAddress = oIPAddress.value;
-	
+    //copy ip address
+	//strIPAddress = oIPAddress.value;
+	//strIPAddress = "localhost:8443";
 	// start connection timeout
 	oConnectionTimeout = setTimeout(function(){ alert("Connection timeout!") }, iConnectionTimeout_ms);
 	
 	// hide the CORE data object on the webpage
-	document.getElementById('Card_CORE_Section_1').style.display = "none";
+	//document.getElementById('Card_CORE_Section_1').style.display = "none";
 	
 	// hide the axis status on the webpage -> below the axis configuration will be read from the CORE. If a axis exist, then show the panel again.
 	let iIndex;
@@ -181,7 +147,6 @@ function FC_Connect() {
 	
 	// send command
 	RestGetToken.send(json);
-	
 }; 
 
 RestGetToken.onload = function() {
@@ -205,7 +170,8 @@ RestGetToken.onload = function() {
 		// Communication established, start a cyclic function
 		// start the interval (1000ms)
 		oIntervId_1000ms = setInterval(ReadCOREValues, 1000);
-		oIntervId_PLC_1000ms = setInterval(ReadPLCValues, 1000);
+		//oIntervId_PLC_1000ms = setInterval(ReadPLCValues, 1000);
+
 		
 		// read axis configuration
 		RestGetAxisConfig.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs?type=browse", true); 
@@ -221,15 +187,15 @@ RestGetToken.onload = function() {
 		oDisconnect.style.display = "inline";
 		// show the clear error button (CORE)
 		oClearError.style.display = "inline";
+
+        drawPlot();
 			
 	}
 }
 
-
-
 // Button Disconnect
-var oDisconnect  = document.getElementById('BtnDisconnect');
-oDisconnect.addEventListener ('click', FC_Disconnect, true);
+//var oDisconnect  = document.getElementById('BtnDisconnect');
+//oDisconnect.addEventListener ('click', FC_Disconnect, true);
 
 function FC_Disconnect() {
 	// stop the interval
@@ -289,13 +255,13 @@ RestGetAxisConfig.onload  = function() {
 		}
 		else
 		{
-			window.alert("Failure with: get the axis configuration")
+		//	window.alert("Failure with: get the axis configuration")
 		}
 	
 	} else { // HTTP error
 	  
 		// handle error
-		window.alert("HTTPS error number: " + myObj.status);
+	//	window.alert("HTTPS error number: " + myObj.status);
 		
 	}
 };
@@ -328,7 +294,7 @@ function ReadAxisValues(aAxes){
 
 	if (aAxes == undefined)
 	{
-		window.alert("no axis configured");
+	//	window.alert("no axis configured");
 		stopInterval_500ms()
 	}
 	else if (aAxes.length > 0)
@@ -408,6 +374,8 @@ function ReadCOREValues(){
 	RestGetMotion_State.setRequestHeader('Authorization', "Bearer " + xToken);
 	RestGetMotion_State.responseType = 'json';
 	RestGetMotion_State.send();
+
+    
 	
 }
 
@@ -463,7 +431,7 @@ RestGetAxisValues_1.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from AxisX: HTTPS ERROR NUMBER: " + myObj.status);
+    //window.alert("Could not read data from AxisX: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_500ms();
   }
   
@@ -496,7 +464,7 @@ RestGetAxisValues_2.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
+    //window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_500ms();
   }
 };
@@ -528,7 +496,7 @@ RestGetAxisValues_3.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
+   // window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_500ms();
   }
 };
@@ -564,7 +532,7 @@ RestGetPLCOpenState_1.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from AxisX: HTTPS ERROR NUMBER: " + myObj.status);
+    //window.alert("Could not read data from AxisX: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_500ms();
   }
 
@@ -599,7 +567,7 @@ RestGetPLCOpenState_2.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
+   // window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_500ms();
   }
 };
@@ -632,7 +600,7 @@ RestGetPLCOpenState_3.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
+   // window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_500ms();
   } 
 };
@@ -651,12 +619,27 @@ RestGetCORE_CPU_Util.onload  = function() {
 	// update the webpage with data from the CORE
 	let oActualCPUUtilisation  = document.getElementById('Status_CPU_UtilisationPercent'); 
 	oActualCPUUtilisation.innerHTML = myObj.response.value + " %";
+    let currentDate = new Date();
+    let time = currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
+    if (newDataTicks > 10 )
+    {
+        CPUData.shift();
+        MEMData.shift();
+        removeData(myChart)
+    }
+    newDataTicks = newDataTicks + 1;
+    addData(myChart, time)
+    MEMData.push(memUsage)
+    CPUData.push(myObj.response.value)
+   
+
   
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+   // window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_1000ms();
+     window.alert("Failure: 1");
   }
 };
 
@@ -671,8 +654,9 @@ RestGetbTest.onload  = function() {
 		PLCData_1.innerHTML = myObj.response.value;
 		} else { // HTTP error
 		// handle error
-		window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	    window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
 		stopInterval_1000ms();
+        
 		}
 
   };
@@ -687,7 +671,7 @@ RestGetiTest.onload  = function() {
 		PLCData_2.value = myObj.response.value;
 		} else { // HTTP error
 		// handle error
-		window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	    window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
 		stopInterval_1000ms();
 		}
 
@@ -723,6 +707,8 @@ RestGetCORE_CPU_Mem.onload  = function() {
 	let oActualCPUMemUsed  = document.getElementById('Status_CPU_MemoryUsedPercent'); 
 	oActualCPUMemUsed.innerHTML = myObj.response.value + " %";
   
+     memUsage = (myObj.response.value)
+
   } else { // HTTP error
   
     // handle error
@@ -770,8 +756,11 @@ RestGetMotion_State.onload  = function() {
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status + "  -> perhaps no motion app is installed");
-	stopInterval_1000ms();
+    let oActualMotionState  = document.getElementById('Status_Motion_State'); 
+	oActualMotionState.innerHTML = "N/A";
+
+    //window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status + "  -> perhaps no motion app is installed");
+	//stopInterval_1000ms();
   }
 };
 
@@ -832,11 +821,29 @@ RestClearError.onload  = function() {
 	
 	} else { // HTTP error
 	  // handle error
-	  window.alert("HTTPS error number: " + RestClearError.status);
+//	  window.alert("HTTPS error number: " + RestClearError.status);
 	}
 };
 
 
+
+function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    /*chart.data.dataset        dataset.data.push(data);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });*/
+    chart.update();
+}
+
+function removeData(chart) {
+    
+    chart.data.labels.shift();
+    /*chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift();
+    });*/
+    chart.update();
+}
 
 
 
@@ -866,7 +873,7 @@ RestTest.onload  = function() {
  
 	if (myObj.status == 200) { // HTTP successfull response
 
-		window.alert(myObj.response.value);
+	//	window.alert(myObj.response.value);
 		// window.alert(myObj.response.value[0]);
 		// window.alert(myObj.response.value[4]);
 		// window.alert(myObj.response.value[5]);
@@ -879,7 +886,7 @@ RestTest.onload  = function() {
 	} else { // HTTP error
 	  
 		// handle error
-		window.alert("HTTPS error number: " + myObj.status);
+	//	window.alert("HTTPS error number: " + myObj.status);
 		
 	}
 };

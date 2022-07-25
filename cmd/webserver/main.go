@@ -19,6 +19,9 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
+	
+	originalPage := filepath.FromSlash(filepath.Join(os.Getenv("SNAP"), "www"))
+	Dir(originalPage, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www",)
 
 	www := ""
 	snapped := false
