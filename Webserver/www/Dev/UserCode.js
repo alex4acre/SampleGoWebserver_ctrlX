@@ -10,6 +10,7 @@ var oConnectionTimeout;
 const iConnectionTimeout_ms = 2000; // connection timeout in [ms]
 var strIPAddress;
 
+
 // the next objects can be used to request data from a web server
 // get more information here: https://developer.mozilla.org/de/docs/Web/API/XMLHttpRequest
 // CORE data
@@ -18,6 +19,10 @@ var RestGetCORE_CPU_Util = new XMLHttpRequest();
 var RestGetCORE_CPU_Mem = new XMLHttpRequest();
 var RestGetCORE_State = new XMLHttpRequest();
 var RestGetMotion_State = new XMLHttpRequest();
+var RestGetCORE_CPU_Util1 = new XMLHttpRequest();
+var RestGetCORE_CPU_Mem1 = new XMLHttpRequest();
+var RestGetCORE_State1 = new XMLHttpRequest();
+var RestGetMotion_State1 = new XMLHttpRequest();
 var RestClearError = new XMLHttpRequest();
 var RestGetAxisConfig = new XMLHttpRequest();
 // Axis data
@@ -45,55 +50,17 @@ var RestBackupRecipe = new XMLHttpRequest();
 var RestRestoreRecipe = new XMLHttpRequest();
 var RestBackupApp = new XMLHttpRequest();
 var RestRestoreApp = new XMLHttpRequest();
-
+var IPaddresses = [];
+var localIPAddress = '192.168.1.1';
+var elementIDs = [];
+var childs;
+var parent;
+var setID = 1;
+var activeElementID;
 
 let bLockRead = false;
 
 var RestTest = new XMLHttpRequest(); // Test
-
-var strIPAddress = location.host;
-    //alert(strIPAddress);
-
-FC_Connect();
-var memUsage = 0;
-var CPUData = [];
-var MEMData = [];
-let newDataTicks = 0;
- const ctx = document.getElementById('myChart');
-    const myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'CPU', 
-            data: CPUData,
-            backgroundColor: [
-                'rgba(6,203,251, 0.2)'
-            ],
-            borderColor: [
-                'rgba(4,92,132,1)'
-            ],
-            borderWidth: 1
-        }, {
-            label: 'Mem', 
-            data: MEMData,
-            backgroundColor: [
-                'rgba(185,202,212,0.2)'
-            ],
-            borderColor: [
-                'rgba(92,124,148)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
 
 // get IP address from textbox
 var oIPAddress = document.getElementById('textBox_IP_address');
@@ -115,15 +82,29 @@ function unLockRead(){
 //var oConnect  = document.getElementById('BtnConnect');
 //oConnect.addEventListener ('click', FC_Connect, true);
 
-function FC_Connect() {
+function FC_Connect(ipAddressConnect) {
+    //location.replace("./controller.html");
     //copy ip address
-	//strIPAddress = oIPAddress.value;
-	//strIPAddress = "localhost:8443";
+	strIPAddress = ipAddressConnect;//oIPAddress.value;
+    //window.alert("Executing...")
+    //window.open("./controller.html");
+    window.open("https://" + strIPAddress + "/your-webserver/controller.html");
+ /*   var g;
+    g = document.createElement("div");
+    h = document.getElementById('connectionContainer');
+    h.appendChild(g);
+    g.innerHTML = document.getElementById('singleConnection').innerHTML;
+    g.setAttribute("id", "div" + setID);
+    elementIDs.push(g.id)
+    console.log(g.id)
+	*/
+    elementIDs.push(setID)
+    setID = setID + 1;
 	// start connection timeout
 	oConnectionTimeout = setTimeout(function(){ alert("Connection timeout!") }, iConnectionTimeout_ms);
-	
+	/*
 	// hide the CORE data object on the webpage
-	//document.getElementById('Card_CORE_Section_1').style.display = "none";
+	document.getElementById('Card_CORE_Section_1').style.display = "none";
 	
 	// hide the axis status on the webpage -> below the axis configuration will be read from the CORE. If a axis exist, then show the panel again.
 	let iIndex;
@@ -132,7 +113,7 @@ function FC_Connect() {
 		let oTest  = document.getElementById('Card_Axis_' + (iIndex + 1)); 
 		oTest.style.display = "none";
 	} 
-	
+	*/
 
 	// This is the first REST command to the ctrlX CORE (get security token)
 	RestGetToken.open("POST", "https://" + strIPAddress + "/identity-manager/api/v1/auth/token", true);
@@ -147,6 +128,7 @@ function FC_Connect() {
 	
 	// send command
 	RestGetToken.send(json);
+	
 }; 
 
 RestGetToken.onload = function() {
@@ -156,7 +138,6 @@ RestGetToken.onload = function() {
 		// delete the "connection timeout"
 		clearTimeout(oConnectionTimeout);
 		
-		//window.alert("Finsihed");
 		//window.alert("Status = " + RestGetToken.status);
 		//window.alert(RestGetToken.response);
 		  
@@ -169,33 +150,38 @@ RestGetToken.onload = function() {
 			 
 		// Communication established, start a cyclic function
 		// start the interval (1000ms)
+        IPaddresses.push(strIPAddress);
+        //for (let i = 0; i < IPaddresses.length; i++) {
+        //    window.alert(IPaddresses[i])
+       //}
+       //window.alert(IPaddresses.length)
 		oIntervId_1000ms = setInterval(ReadCOREValues, 1000);
 		//oIntervId_PLC_1000ms = setInterval(ReadPLCValues, 1000);
 
 		
 		// read axis configuration
-		RestGetAxisConfig.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs?type=browse", true); 
+		/*RestGetAxisConfig.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs?type=browse", true); 
 		RestGetAxisConfig.setRequestHeader('Content-type', 'application/json');
 		RestGetAxisConfig.setRequestHeader('Authorization', "Bearer " + xToken);
 		RestGetAxisConfig.responseType = 'json';
-		RestGetAxisConfig.send();
+		RestGetAxisConfig.send();*/
 			
 			
 		// hide the connect button
 		oConnect.style.display = "none";
 		// show the disconnect button
-		oDisconnect.style.display = "inline";
+		oDisconnect.style.display = "none";
 		// show the clear error button (CORE)
-		oClearError.style.display = "inline";
-
-        drawPlot();
+		oClearError.style.display = "none";
 			
 	}
 }
 
+
+
 // Button Disconnect
-//var oDisconnect  = document.getElementById('BtnDisconnect');
-//oDisconnect.addEventListener ('click', FC_Disconnect, true);
+var oDisconnect  = document.getElementById('BtnDisconnect');
+oDisconnect.addEventListener ('click', FC_Disconnect, true);
 
 function FC_Disconnect() {
 	// stop the interval
@@ -350,260 +336,73 @@ function ReadAxisValues(aAxes){
 function ReadCOREValues(){
 	
 	// execute several REST commands
-	
-	RestGetCORE_CPU_Util.open("GET", "https://" + strIPAddress + "/automation/api/v1/framework/metrics/system/cpu-utilisation-percent", true); 
-	RestGetCORE_CPU_Util.setRequestHeader('Content-type', 'application/json');
-	RestGetCORE_CPU_Util.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetCORE_CPU_Util.responseType = 'json';
-	RestGetCORE_CPU_Util.send();
-	
-	RestGetCORE_CPU_Mem.open("GET", "https://" + strIPAddress + "/automation/api/v1/framework/metrics/system/memused-percent", true); 
-	RestGetCORE_CPU_Mem.setRequestHeader('Content-type', 'application/json');
-	RestGetCORE_CPU_Mem.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetCORE_CPU_Mem.responseType = 'json';
-	RestGetCORE_CPU_Mem.send();
-	
-	RestGetCORE_State.open("GET", "https://" + strIPAddress + "/automation/api/v1/framework/state", true); 
-	RestGetCORE_State.setRequestHeader('Content-type', 'application/json');
-	RestGetCORE_State.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetCORE_State.responseType = 'json';
-	RestGetCORE_State.send();
-	
-	RestGetMotion_State.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/state/opstate", true); 
-	RestGetMotion_State.setRequestHeader('Content-type', 'application/json');
-	RestGetMotion_State.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetMotion_State.responseType = 'json';
-	RestGetMotion_State.send();
+	for (let i = 0; i < IPaddresses.length; i++) {
+        localIPAddress = IPaddresses[i];
+        activeElementID = elementIDs[i];
+     /*   console.log(document.getElementById(elementIDs[i]).id)
+        parent = document.getElementById(elementIDs[i]);
+        childs = parent.childNodes;
+        parent = childs[1]
+        childs = parent.childNodes;
+        parent = childs[1]
+        childs = parent.childNodes;
+        parent = childs[9]
+        childs = parent.childNodes;
+        parent = childs[2]
+        childs = parent.childNodes;
+        console.log(childs)*/
 
-    
+        RestGetCORE_CPU_Util.open("GET", "https://192.168.1.1/automation/api/v1/framework/metrics/system/cpu-utilisation-percent", true); 
+        RestGetCORE_CPU_Util.setRequestHeader('Content-type', 'application/json');
+        RestGetCORE_CPU_Util.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetCORE_CPU_Util.responseType = 'json';
+        RestGetCORE_CPU_Util.send();
+        
+        RestGetCORE_CPU_Mem.open("GET", "https://192.168.1.1/automation/api/v1/framework/metrics/system/memused-percent", true); 
+        RestGetCORE_CPU_Mem.setRequestHeader('Content-type', 'application/json');
+        RestGetCORE_CPU_Mem.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetCORE_CPU_Mem.responseType = 'json';
+        RestGetCORE_CPU_Mem.send();
+        
+        RestGetCORE_State.open("GET", "https://192.168.1.1/automation/api/v1/framework/state", true); 
+        RestGetCORE_State.setRequestHeader('Content-type', 'application/json');
+        RestGetCORE_State.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetCORE_State.responseType = 'json';
+        RestGetCORE_State.send();
+        
+        RestGetMotion_State.open("GET", "https://192.168.1.1/automation/api/v1/motion/state/opstate", true); 
+        RestGetMotion_State.setRequestHeader('Content-type', 'application/json');
+        RestGetMotion_State.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetMotion_State.responseType = 'json';
+        RestGetMotion_State.send();
+
+        RestGetCORE_CPU_Util1.open("GET", "https://192.168.1.2/automation/api/v1/framework/metrics/system/cpu-utilisation-percent", true); 
+        RestGetCORE_CPU_Util1.setRequestHeader('Content-type', 'application/json');
+        RestGetCORE_CPU_Util1.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetCORE_CPU_Util1.responseType = 'json';
+        RestGetCORE_CPU_Util1.send();
+        
+        RestGetCORE_CPU_Mem1.open("GET", "https://192.168.1.2/automation/api/v1/framework/metrics/system/memused-percent", true); 
+        RestGetCORE_CPU_Mem1.setRequestHeader('Content-type', 'application/json');
+        RestGetCORE_CPU_Mem1.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetCORE_CPU_Mem1.responseType = 'json';
+        RestGetCORE_CPU_Mem1.send();
+        
+        RestGetCORE_State1.open("GET", "https://192.168.1.2/automation/api/v1/framework/state", true); 
+        RestGetCORE_State1.setRequestHeader('Content-type', 'application/json');
+        RestGetCORE_State1.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetCORE_State1.responseType = 'json';
+        RestGetCORE_State1.send();
+        
+        RestGetMotion_State1.open("GET", "https://192.168.1.2/automation/api/v1/motion/state/opstate", true); 
+        RestGetMotion_State1.setRequestHeader('Content-type', 'application/json');
+        RestGetMotion_State1.setRequestHeader('Authorization', "Bearer " + xToken);
+        RestGetMotion_State1.responseType = 'json';
+        RestGetMotion_State1.send();
+    }
 	
 }
 
-function ReadPLCValues(){
-	if (!bLockRead){
-	// execute several REST commands
-	RestGetbTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/bTest", true); 
-	RestGetbTest.setRequestHeader('Content-type', 'application/json');
-	RestGetbTest.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetbTest.responseType = 'json';
-	RestGetbTest.send();
-
-	RestGetiTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/iTest", true); 
-	RestGetiTest.setRequestHeader('Content-type', 'application/json');
-	RestGetiTest.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetiTest.responseType = 'json';
-	RestGetiTest.send();
-
-	RestGetrTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/plc/app/Application/sym/PLC_PRG/rTest", true); 
-	RestGetrTest.setRequestHeader('Content-type', 'application/json');
-	RestGetrTest.setRequestHeader('Authorization', "Bearer " + xToken);
-	RestGetrTest.responseType = 'json';
-	RestGetrTest.send();
-	}
-}
-
-
-
-
-RestGetAxisValues_1.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetAxisValues_1;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let ActualPosition  = document.getElementById('Panel_ActualPosition_1'); 
-	ActualPosition.innerHTML = myObj.response.actualPos.toFixed(2);
-	
-	// update the webpage with data from the axis status
-	let ActualSpeed  = document.getElementById('Panel_ActualSpeed_1'); 
-	ActualSpeed.innerHTML = myObj.response.actualVel.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let ActualTorque  = document.getElementById('Panel_ActualTorque_1'); 
-	ActualTorque.innerHTML = myObj.response.actualTorque.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let DistLeft  = document.getElementById('Panel_DistLeft_1'); 
-	DistLeft.innerHTML = myObj.response.distLeft.toFixed(2);
-  
-  } else { // HTTP error
-  
-    // handle error
-    //window.alert("Could not read data from AxisX: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-  
-};
-
-
-RestGetAxisValues_2.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetAxisValues_2;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let ActualPosition  = document.getElementById('Panel_ActualPosition_2'); 
-	ActualPosition.innerHTML = myObj.response.actualPos.toFixed(2);
-	
-	// update the webpage with data from the axis status
-	let ActualSpeed  = document.getElementById('Panel_ActualSpeed_2'); 
-	ActualSpeed.innerHTML = myObj.response.actualVel.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let ActualTorque  = document.getElementById('Panel_ActualTorque_2'); 
-	ActualTorque.innerHTML = myObj.response.actualTorque.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let DistLeft  = document.getElementById('Panel_DistLeft_2'); 
-	DistLeft.innerHTML = myObj.response.distLeft.toFixed(2);
-  
-  } else { // HTTP error
-  
-    // handle error
-    //window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-};
-
-
-RestGetAxisValues_3.onload  = function() {
-
- // copy response object
-  myObj = RestGetAxisValues_3;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let ActualPosition  = document.getElementById('Panel_ActualPosition_3'); 
-	ActualPosition.innerHTML = myObj.response.actualPos.toFixed(2);
-	
-	// update the webpage with data from the axis status
-	let ActualSpeed  = document.getElementById('Panel_ActualSpeed_3'); 
-	ActualSpeed.innerHTML = myObj.response.actualVel.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let ActualTorque  = document.getElementById('Panel_ActualTorque_3'); 
-	ActualTorque.innerHTML = myObj.response.actualTorque.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let DistLeft  = document.getElementById('Panel_DistLeft_3'); 
-	DistLeft.innerHTML = myObj.response.distLeft.toFixed(2);
-  
-  } else { // HTTP error
-  
-    // handle error
-   // window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-};
-
-
-
-
-RestGetPLCOpenState_1.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetPLCOpenState_1;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let oPLCopenState  = document.getElementById('Panel_State_1'); 
-	oPLCopenState.innerHTML = myObj.response.value;
-	
-	// change the color depend on the axis state
-	if (myObj.response.value == "ERRORSTOP"){
-		
-		oPLCopenState.className = "badge badge-pill badge-danger d-inline-flex align-items-center ml-3 w-20 h-50";
-		// enable the clear error button
-		document.getElementById('BtnClearErrorAxis_1').disabled = false; 
-	}
-	else{
-		oPLCopenState.className = "badge badge-pill badge-success d-inline-flex align-items-center ml-3 w-20 h-50";
-		// disable the clear error button
-		document.getElementById('BtnClearErrorAxis_1').disabled = true; 
-	}
-	
-	
-  } else { // HTTP error
-  
-    // handle error
-    //window.alert("Could not read data from AxisX: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-
-};
-
-
-RestGetPLCOpenState_2.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetPLCOpenState_2;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let oPLCopenState  = document.getElementById('Panel_State_2'); 
-	oPLCopenState.innerHTML = myObj.response.value;
-	
-	// change the color depend on the axis state
-	if (myObj.response.value == "ERRORSTOP"){
-		
-		oPLCopenState.className = "badge badge-pill badge-danger d-inline-flex align-items-center ml-3 w-20 h-50";
-		// enable the clear error button
-		document.getElementById('BtnClearErrorAxis_2').disabled = false; 
-	}
-	else{
-		oPLCopenState.className = "badge badge-pill badge-success d-inline-flex align-items-center ml-3 w-20 h-50";
-		// disable the clear error button
-		document.getElementById('BtnClearErrorAxis_2').disabled = true; 
-	}
-	
-	
-  } else { // HTTP error
-  
-    // handle error
-   // window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-};
-
-
-RestGetPLCOpenState_3.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetPLCOpenState_3;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let oPLCopenState  = document.getElementById('Panel_State_3'); 
-	oPLCopenState.innerHTML = myObj.response.value;
-	
-	// change the color depend on the axis state
-	if (myObj.response.value == "ERRORSTOP"){
-		
-		oPLCopenState.className = "badge badge-pill badge-danger d-inline-flex align-items-center ml-3 w-20 h-50";
-		// enable the clear error button
-		document.getElementById('BtnClearErrorAxis_3').disabled = false;
-	}
-	else{
-		oPLCopenState.className = "badge badge-pill badge-success d-inline-flex align-items-center ml-3 w-20 h-50";
-		// disable the clear error button
-		document.getElementById('BtnClearErrorAxis_3').disabled = true; 
-	}
-	
-  } else { // HTTP error
-  
-    // handle error
-   // window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  } 
-};
 
 
 
@@ -617,82 +416,40 @@ RestGetCORE_CPU_Util.onload  = function() {
 	// window.alert(myObj);
 	
 	// update the webpage with data from the CORE
-	let oActualCPUUtilisation  = document.getElementById('Status_CPU_UtilisationPercent'); 
+	let oActualCPUUtilisation = document.getElementById('Status_CPU_UtilisationPercent1'); 
 	oActualCPUUtilisation.innerHTML = myObj.response.value + " %";
-    let currentDate = new Date();
-    let time = currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
-    if (newDataTicks > 10 )
-    {
-        CPUData.shift();
-        MEMData.shift();
-        removeData(myChart)
-    }
-    newDataTicks = newDataTicks + 1;
-    addData(myChart, time)
-    MEMData.push(memUsage)
-    CPUData.push(myObj.response.value)
-   
-
   
   } else { // HTTP error
   
     // handle error
    // window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_1000ms();
-     window.alert("Failure: 1");
+	//stopInterval_1000ms();
+    // window.alert("Failure: 1");
   }
 };
 
-
-RestGetbTest.onload  = function() {
-
-		// copy response object
-		myObj = RestGetbTest;//RestGetCORE_CPU_Mem;
-		if (myObj.status == 200) { // HTTP successfull response
-		// update the webpage with data from the CORE
-		let PLCData_1  = document.getElementById('Panel_PLCdata_1'); 
-		PLCData_1.innerHTML = myObj.response.value;
-		} else { // HTTP error
-		// handle error
-	    window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-		stopInterval_1000ms();
-        
-		}
-
-  };
-
-RestGetiTest.onload  = function() {
-
-		// copy response object
-		myObj = RestGetiTest;//RestGetCORE_CPU_Mem;
-		if (myObj.status == 200) { // HTTP successfull response
-		// update the webpage with data from the CORE
-		let PLCData_2  = document.getElementById('Panel_PLCdata_2'); 
-		PLCData_2.value = myObj.response.value;
-		} else { // HTTP error
-		// handle error
-	    window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-		stopInterval_1000ms();
-		}
-
-};
+RestGetCORE_CPU_Util1.onload  = function() {
  
-RestGetrTest.onload  = function() {
-
-		// copy response object
-		myObj = RestGetrTest;//RestGetCORE_CPU_Mem;
-		if (myObj.status == 200) { // HTTP successfull response
-		// update the webpage with data from the CORE
-		let PLCData_3  = document.getElementById('Panel_PLCdata_3'); 
-		PLCData_3.value = myObj.response.value.toFixed(3);
-		} else { // HTTP error
-		// handle error
-		window.alert("Could not read PLC data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-		stopInterval_1000ms();
-		}
-
-};
+  // copy response object
+  myObj = RestGetCORE_CPU_Util1;
  
+  if (myObj.status == 200) { // HTTP successfull response
+
+	// window.alert(myObj);
+	
+	// update the webpage with data from the CORE
+	let oActualCPUUtilisation = document.getElementById('Status_CPU_UtilisationPercent2'); 
+	oActualCPUUtilisation.innerHTML = myObj.response.value + " %";
+  
+  } else { // HTTP error
+  
+    // handle error
+   // window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	//stopInterval_1000ms();
+    // window.alert("Failure: 1");
+  }
+};
+
 
 RestGetCORE_CPU_Mem.onload  = function() {
 	
@@ -704,16 +461,35 @@ RestGetCORE_CPU_Mem.onload  = function() {
 	// window.alert(myObj);
 	
 	// update the webpage with data from the CORE
-	let oActualCPUMemUsed  = document.getElementById('Status_CPU_MemoryUsedPercent'); 
+	let oActualCPUMemUsed  = document.getElementById('Status_CPU_MemoryUsedPercent1'); 
 	oActualCPUMemUsed.innerHTML = myObj.response.value + " %";
   
-     memUsage = (myObj.response.value)
-
   } else { // HTTP error
   
     // handle error
     window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
 	stopInterval_1000ms();
+  }
+};
+
+RestGetCORE_CPU_Mem1.onload  = function() {
+	
+  // copy response object
+  myObj = RestGetCORE_CPU_Mem1;
+ 
+  if (myObj.status == 200) { // HTTP successfull response
+	
+	// window.alert(myObj);
+	
+	// update the webpage with data from the CORE
+	let oActualCPUMemUsed  = document.getElementById('Status_CPU_MemoryUsedPercent2'); 
+	oActualCPUMemUsed.innerHTML = myObj.response.value + " %";
+  
+  } else { // HTTP error
+  
+    // handle error
+    //window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	//stopInterval_1000ms();
   }
 };
 
@@ -728,14 +504,14 @@ RestGetCORE_State.onload  = function() {
 	// window.alert(myObj);
 	
 	// update the webpage with data from the CORE
-	let oActualCPUState  = document.getElementById('Status_CORE_State'); 
+	let oActualCPUState  = document.getElementById('Status_CORE_State' + activeElementID); 
 	oActualCPUState.innerHTML = myObj.response.state;
   
   } else { // HTTP error
   
     // handle error
-    window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_1000ms();
+    //window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status);
+	//stopInterval_1000ms();
   }
 };
 
@@ -750,21 +526,40 @@ RestGetMotion_State.onload  = function() {
 	// window.alert(myObj);
 	
 	// update the webpage with data from the CORE
-	let oActualMotionState  = document.getElementById('Status_Motion_State'); 
+	let oActualMotionState  = document.getElementById('Status_Motion_State1'); 
 	oActualMotionState.innerHTML = myObj.response.value;
   
   } else { // HTTP error
-  
+     let oActualMotionState  = document.getElementById('Status_Motion_State1'); 
+     oActualMotionState.innerHTML = "N/A";
     // handle error
-    let oActualMotionState  = document.getElementById('Status_Motion_State'); 
-	oActualMotionState.innerHTML = "N/A";
-
     //window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status + "  -> perhaps no motion app is installed");
 	//stopInterval_1000ms();
   }
 };
 
 
+RestGetMotion_State1.onload  = function() {
+ 
+  // copy response object
+  myObj = RestGetMotion_State1;
+ 
+  if (myObj.status == 200) { // HTTP successfull response
+	
+	// window.alert(myObj);
+	
+	// update the webpage with data from the CORE
+	let oActualMotionState  = document.getElementById('Status_Motion_State2'); 
+	oActualMotionState.innerHTML = myObj.response.value;
+  
+  } else { // HTTP error
+     let oActualMotionState  = document.getElementById('Status_Motion_State2'); 
+     oActualMotionState.innerHTML = "N/A";
+    // handle error
+    //window.alert("Could not read data from CORE: HTTPS ERROR NUMBER: " + myObj.status + "  -> perhaps no motion app is installed");
+	//stopInterval_1000ms();
+  }
+};
 
 
 
@@ -826,24 +621,6 @@ RestClearError.onload  = function() {
 };
 
 
-
-function addData(chart, label, data) {
-    chart.data.labels.push(label);
-    /*chart.data.dataset        dataset.data.push(data);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });*/
-    chart.update();
-}
-
-function removeData(chart) {
-    
-    chart.data.labels.shift();
-    /*chart.data.datasets.forEach((dataset) => {
-        dataset.data.shift();
-    });*/
-    chart.update();
-}
 
 
 
