@@ -34,18 +34,6 @@ var RestGetrTest = new XMLHttpRequest();
 var RestPutrTest = new XMLHttpRequest();
 var RestPutiTest = new XMLHttpRequest();
 var RestPutbTest = new XMLHttpRequest();
-//USB Data
-var RestGetUSBID_Unmount = new XMLHttpRequest();
-var RestGetUSBID_Mount = new XMLHttpRequest();
-var RestMountUSB = new XMLHttpRequest();
-var RestUnmountUSB = new XMLHttpRequest();
-var RestUSBPath = new XMLHttpRequest();
-//controlling back up and restore
-var RestBackupRecipe = new XMLHttpRequest();
-var RestRestoreRecipe = new XMLHttpRequest();
-var RestBackupApp = new XMLHttpRequest();
-var RestRestoreApp = new XMLHttpRequest();
-
 
 let bLockRead = false;
 
@@ -54,12 +42,14 @@ var RestTest = new XMLHttpRequest(); // Test
 var strIPAddress = location.host;
     //alert(strIPAddress);
 
-FC_Connect();
-var memUsage = 0;
-var CPUData = [];
-var MEMData = [];
-let newDataTicks = 0;
- const ctx = document.getElementById('myChart');
+FC_Connect(); //connect to the local controller
+var memUsage = 0; //variable to hold the current memory usage reading
+var CPUData = []; //CPU data holder for chart
+var MEMData = []; //Mem data holder for chart
+let newDataTicks = 0; 
+
+//Initialize the chart
+const ctx = document.getElementById('myChart');
     const myChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -107,23 +97,9 @@ function unLockRead(){
 }
 
 
-//-------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------------------------
-
-// Button Connect
-//var oConnect  = document.getElementById('BtnConnect');
-//oConnect.addEventListener ('click', FC_Connect, true);
-
 function FC_Connect() {
     //copy ip address
-	//strIPAddress = oIPAddress.value;
-	//strIPAddress = "localhost:8443";
-	// start connection timeout
 	oConnectionTimeout = setTimeout(function(){ alert("Connection timeout!") }, iConnectionTimeout_ms);
-	
-	// hide the CORE data object on the webpage
-	//document.getElementById('Card_CORE_Section_1').style.display = "none";
 	
 	// hide the axis status on the webpage -> below the axis configuration will be read from the CORE. If a axis exist, then show the panel again.
 	let iIndex;
@@ -133,17 +109,14 @@ function FC_Connect() {
 		oTest.style.display = "none";
 	} 
 	
-
 	// This is the first REST command to the ctrlX CORE (get security token)
 	RestGetToken.open("POST", "https://" + strIPAddress + "/identity-manager/api/v1/auth/token", true);
-
 
 	let json = JSON.stringify({
 		"name":sUser,"password":sPassword
 	});
 	RestGetToken.setRequestHeader('Content-type', 'application/json');
 	RestGetToken.responseType = 'json';
-	
 	
 	// send command
 	RestGetToken.send(json);
@@ -156,10 +129,6 @@ RestGetToken.onload = function() {
 		// delete the "connection timeout"
 		clearTimeout(oConnectionTimeout);
 		
-		//window.alert("Finsihed");
-		//window.alert("Status = " + RestGetToken.status);
-		//window.alert(RestGetToken.response);
-		  
 		myObj = RestGetToken.response;
 		xToken = myObj.access_token;
 		//window.alert(xToken);
@@ -188,8 +157,7 @@ RestGetToken.onload = function() {
 		// show the clear error button (CORE)
 		oClearError.style.display = "inline";
 
-        drawPlot();
-			
+        drawPlot(); //update the chart
 	}
 }
 
@@ -231,10 +199,6 @@ RestGetAxisConfig.onload  = function() {
 	if (myObj.status == 200) { // HTTP successfull response
 	
 		aGetConfiguredAxes = myObj.response.value;
-
-		//window.alert(myObj.response.value);
-		//window.alert(myObj.response.value[1]);
-		//window.alert(myObj.response.value.length);
 		
 		// how many axes are configured
 		if (aGetConfiguredAxes.length > 0)
@@ -267,8 +231,6 @@ RestGetAxisConfig.onload  = function() {
 };
 
 
-
-
 //-------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------
@@ -289,9 +251,6 @@ function stopInterval_1000ms() {
 
 function ReadAxisValues(aAxes){
 	
-	// execute several REST commands
-	//window.alert(aAxes);
-
 	if (aAxes == undefined)
 	{
 	//	window.alert("no axis configured");
@@ -375,8 +334,6 @@ function ReadCOREValues(){
 	RestGetMotion_State.responseType = 'json';
 	RestGetMotion_State.send();
 
-    
-	
 }
 
 function ReadPLCValues(){
@@ -401,8 +358,6 @@ function ReadPLCValues(){
 	RestGetrTest.send();
 	}
 }
-
-
 
 
 RestGetAxisValues_1.onload  = function() {
@@ -500,8 +455,6 @@ RestGetAxisValues_3.onload  = function() {
 	stopInterval_500ms();
   }
 };
-
-
 
 
 RestGetPLCOpenState_1.onload  = function() {
@@ -765,9 +718,6 @@ RestGetMotion_State.onload  = function() {
 };
 
 
-
-
-
 // Button ClearError -> CORE
 var oClearError  = document.getElementById('BtnClearError');
 oClearError.addEventListener ('click', function() {FC_ClearError(0);});
@@ -812,7 +762,6 @@ function FC_ClearError(iDevice) {
 	}
 }
 
-
 RestClearError.onload  = function() {
 
 	if (RestClearError.status == 200) { // HTTP successfull response
@@ -824,8 +773,6 @@ RestClearError.onload  = function() {
 //	  window.alert("HTTPS error number: " + RestClearError.status);
 	}
 };
-
-
 
 function addData(chart, label, data) {
     chart.data.labels.push(label);
@@ -844,59 +791,3 @@ function removeData(chart) {
     });*/
     chart.update();
 }
-
-
-
-
-// ----------------------------------------------------------------------------------------------------------------------
-// Tests
-// ----------------------------------------------------------------------------------------------------------------------
-var oTest  = document.getElementById('BtnFunctionTest');
-oTest.addEventListener ('click', FC_Test, true);
-
-function FC_Test() {
-	
-//	RestTest.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs?type=browse", true); 
-//	RestTest.setRequestHeader('Content-type', 'application/json');
-//	RestTest.setRequestHeader('Authorization', "Bearer " + xToken);
-//	RestTest.responseType = 'json';
-//	RestTest.send();
-	
-	// window.alert("Test");
-
-}
-
-
-RestTest.onload  = function() {
- 
-	myObj = RestTest;
- 
-	if (myObj.status == 200) { // HTTP successfull response
-
-	//	window.alert(myObj.response.value);
-		// window.alert(myObj.response.value[0]);
-		// window.alert(myObj.response.value[4]);
-		// window.alert(myObj.response.value[5]);
-		// window.alert(myObj.response.value.length);
-		
-		// update the webpage with data from...
-		//var ActualMotionState  = document.getElementById('Status_Motion_State'); 
-		//ActualMotionState.innerHTML = myObj;
-	  
-	} else { // HTTP error
-	  
-		// handle error
-	//	window.alert("HTTPS error number: " + myObj.status);
-		
-	}
-};
-
-
-
-
-
-
-
-
-
-

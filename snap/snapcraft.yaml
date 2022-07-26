@@ -4,6 +4,7 @@
 # See https://snapcraft.io/docs/snapcraft-yaml-reference
 
 name: rexroth-hello-webserver
+#name: your-webserver
 version: '2.0.0'
 icon: snap/icons/icon.png
 summary: Simple Go-Webserver 

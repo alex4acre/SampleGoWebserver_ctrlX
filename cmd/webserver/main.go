@@ -15,7 +15,7 @@ import (
 func main() {
 
 	//Create a folder/directory at a full qualified path for the website
-	if _, err := os.Stat("sample.txt"); err == nil {
+	if _, err := os.Stat("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www/DO_NOT_DELETE"); err == nil {
 		//do nothing, the file exists
 	 } else {
 		err := os.MkdirAll("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", os.ModePerm)
