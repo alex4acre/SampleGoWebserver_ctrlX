@@ -15,13 +15,18 @@ import (
 func main() {
 
 	//Create a folder/directory at a full qualified path for the website
-    err := os.MkdirAll("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", os.ModePerm)
-    if err != nil {
-        log.Fatal(err)
-    }
-	
-	originalPage := filepath.FromSlash(filepath.Join(os.Getenv("SNAP"), "www"))
-	Dir(originalPage, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www",)
+	if _, err := os.Stat("sample.txt"); err == nil {
+		//do nothing, the file exists
+	 } else {
+		err := os.MkdirAll("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www", os.ModePerm)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//clear the directory and copy over the new file content
+		os.RemoveAll("/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www")
+		originalPage := filepath.FromSlash(filepath.Join(os.Getenv("SNAP"), "www"))
+		Dir(originalPage, "/var/snap/rexroth-solutions/common/solutions/activeConfiguration/Webserver/www",)
+	 }		
 
 	www := ""
 	snapped := false
