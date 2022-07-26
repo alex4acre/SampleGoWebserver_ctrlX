@@ -40,7 +40,8 @@ func main() {
 	// Differentiate between app is snapped (-> unix sockets) and app is running external (-> tcp)
 	if snapped {
 
-		sockpath := filepath.Join(os.Getenv("SNAP_DATA"), "/package-run/rexroth-hello-webserver/")
+		//sockpath := filepath.Join(os.Getenv("SNAP_DATA"), "/package-run/rexroth-hello-webserver/")
+		sockpath := filepath.Join(os.Getenv("SNAP_DATA"), "/package-run/your-webserver/")
 		sockfile := filepath.Join(sockpath, "web.sock")
 		if _, err := os.Stat(sockpath); os.IsNotExist(err) {
 			os.MkdirAll(sockpath, os.ModePerm)
