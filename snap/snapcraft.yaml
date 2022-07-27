@@ -5,7 +5,7 @@
 
 #name: rexroth-hello-webserver
 name: your-webserver
-version: '2.0.0'
+version: '2.0.1'
 icon: snap/icons/icon.png
 summary: Simple Go-Webserver 
 description: This sample app shows how to create a webserver app in ctrlX CORE

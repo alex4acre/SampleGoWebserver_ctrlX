@@ -3,6 +3,7 @@ var oIntervId_500ms;
 var oIntervId_1000ms;
 var oIntervId_PLC_1000ms;
 var aGetConfiguredAxes;
+var aGetConfiguredAxesNames;
 const iMaxNumOfAxes = 3;
 const sUser = "boschrexroth";
 const sPassword = "boschrexroth";
@@ -37,6 +38,9 @@ var RestTest = new XMLHttpRequest(); // Test
 
 var strIPAddress = location.host;
     //alert(strIPAddress);
+
+   
+
 
 FC_Connect(); //connect to the local controller
 var memUsage = 0; //variable to hold the current memory usage reading
@@ -102,7 +106,7 @@ function FC_Connect() {
 	let iIndex;
 	for (iIndex = 0; iIndex < iMaxNumOfAxes; iIndex++) {			
 		// remove axis status from webpage
-		let oTest  = document.getElementById('Card_Axis_' + (iIndex + 1)); 
+        let oTest  = document.getElementById('Card_Axis_1'); 
 		oTest.style.display = "none";
 	} 
 	
@@ -117,7 +121,12 @@ function FC_Connect() {
 	
 	// send command
 	RestGetToken.send(json);
+
+
 }; 
+
+
+
 
 RestGetToken.onload = function() {
 		
@@ -191,6 +200,13 @@ function FC_Disconnect() {
 	
 }
 
+function updateAxis(){
+    var select = document.getElementById('availableAxes');
+    aGetConfiguredAxes[0] = select.options[select.selectedIndex].value
+    //alert(aGetConfiguredAxes[0])
+    //alert(select.selectedIndex)
+}
+
 RestGetAxisConfig.onload  = function() {
  
 	myObj = RestGetAxisConfig;
@@ -198,22 +214,33 @@ RestGetAxisConfig.onload  = function() {
 	if (myObj.status == 200) { // HTTP successfull response
 	
 		aGetConfiguredAxes = myObj.response.value;
-		
+		aGetConfiguredAxesNames = aGetConfiguredAxes;
 		// how many axes are configured
 		if (aGetConfiguredAxes.length > 0)
 		{
 			// start a cyclic function
 			oIntervId_500ms = setInterval(function() {ReadAxisValues(aGetConfiguredAxes);}, 500);
-			
+			var oTest  = document.getElementById('Card_Axis_1'); 
+				oTest.style.display = "flex";
 			var i;
 			for (i = 0; i < aGetConfiguredAxes.length; i++) {
-				// update the webpage with data from the axis status
+				/*// update the webpage with data from the axis status
 				var oText = document.getElementById('Text_Axis_' + (i + 1));
-				oText.innerHTML = aGetConfiguredAxes[i];
-				
+				oText.innerHTML = aGetConfiguredAxes[i];*/
+
+				/*
 				// show axis status if a axis is configured
 				var oTest  = document.getElementById('Card_Axis_' + (i + 1)); 
 				oTest.style.display = "flex";
+                */
+
+                var mySelect = document.getElementById("availableAxes")
+                var newElement = document.createElement("option");
+                newElement.text = aGetConfiguredAxesNames[i];
+                //newElement.color = "rgb(4,92,132)";
+                newElement.style = "color:rgb(4,92,132); font-weight: 700;"
+                mySelect.add(newElement); 
+                
 			} 
 		}
 		else
@@ -252,7 +279,7 @@ function ReadAxisValues(aAxes){
 	
 	if (aAxes == undefined)
 	{
-	//	window.alert("no axis configured");
+		window.alert("no axis configured");
 		stopInterval_500ms()
 	}
 	else if (aAxes.length > 0)
@@ -270,37 +297,6 @@ function ReadAxisValues(aAxes){
 		RestGetPLCOpenState_1.setRequestHeader('Authorization', "Bearer " + xToken);
 		RestGetPLCOpenState_1.responseType = 'json';
 		RestGetPLCOpenState_1.send();
-		
-		if (aAxes.length > 1)
-		{
-			RestGetAxisValues_2.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs/" + aAxes[1] + "/state/values/actual", true);
-			RestGetAxisValues_2.setRequestHeader('Content-type', 'application/json');
-			RestGetAxisValues_2.setRequestHeader('Authorization', "Bearer " + xToken);
-			RestGetAxisValues_2.responseType = 'json';
-			RestGetAxisValues_2.send();
-			
-			RestGetPLCOpenState_2.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs/" + aAxes[1] + "/state/opstate/plcopen", true);
-			RestGetPLCOpenState_2.setRequestHeader('Content-type', 'application/json');
-			RestGetPLCOpenState_2.setRequestHeader('Authorization', "Bearer " + xToken);
-			RestGetPLCOpenState_2.responseType = 'json';
-			RestGetPLCOpenState_2.send();
-		}
-		
-		
-		if (aAxes.length > 2)
-		{
-			RestGetAxisValues_3.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs/" + aAxes[2] + "/state/values/actual", true);
-			RestGetAxisValues_3.setRequestHeader('Content-type', 'application/json');
-			RestGetAxisValues_3.setRequestHeader('Authorization', "Bearer " + xToken);
-			RestGetAxisValues_3.responseType = 'json';
-			RestGetAxisValues_3.send();
-			
-			RestGetPLCOpenState_3.open("GET", "https://" + strIPAddress + "/automation/api/v1/motion/axs/" + aAxes[2] + "/state/opstate/plcopen", true);
-			RestGetPLCOpenState_3.setRequestHeader('Content-type', 'application/json');
-			RestGetPLCOpenState_3.setRequestHeader('Authorization', "Bearer " + xToken);
-			RestGetPLCOpenState_3.responseType = 'json';
-			RestGetPLCOpenState_3.send();
-		}
 	}
 
 }
@@ -380,71 +376,6 @@ RestGetAxisValues_1.onload  = function() {
   
 };
 
-
-RestGetAxisValues_2.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetAxisValues_2;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let ActualPosition  = document.getElementById('Panel_ActualPosition_2'); 
-	ActualPosition.innerHTML = myObj.response.actualPos.toFixed(2);
-	
-	// update the webpage with data from the axis status
-	let ActualSpeed  = document.getElementById('Panel_ActualSpeed_2'); 
-	ActualSpeed.innerHTML = myObj.response.actualVel.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let ActualTorque  = document.getElementById('Panel_ActualTorque_2'); 
-	ActualTorque.innerHTML = myObj.response.actualTorque.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let DistLeft  = document.getElementById('Panel_DistLeft_2'); 
-	DistLeft.innerHTML = myObj.response.distLeft.toFixed(2);
-  
-  } else { // HTTP error
-  
-    // handle error
-    //window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-};
-
-
-RestGetAxisValues_3.onload  = function() {
-
- // copy response object
-  myObj = RestGetAxisValues_3;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let ActualPosition  = document.getElementById('Panel_ActualPosition_3'); 
-	ActualPosition.innerHTML = myObj.response.actualPos.toFixed(2);
-	
-	// update the webpage with data from the axis status
-	let ActualSpeed  = document.getElementById('Panel_ActualSpeed_3'); 
-	ActualSpeed.innerHTML = myObj.response.actualVel.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let ActualTorque  = document.getElementById('Panel_ActualTorque_3'); 
-	ActualTorque.innerHTML = myObj.response.actualTorque.toFixed(1);
-	
-	// update the webpage with data from the axis status
-	let DistLeft  = document.getElementById('Panel_DistLeft_3'); 
-	DistLeft.innerHTML = myObj.response.distLeft.toFixed(2);
-  
-  } else { // HTTP error
-  
-    // handle error
-   // window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-};
-
-
 RestGetPLCOpenState_1.onload  = function() {
   
   // copy response object
@@ -480,71 +411,6 @@ RestGetPLCOpenState_1.onload  = function() {
 };
 
 
-RestGetPLCOpenState_2.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetPLCOpenState_2;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let oPLCopenState  = document.getElementById('Panel_State_2'); 
-	oPLCopenState.innerHTML = myObj.response.value;
-	
-	// change the color depend on the axis state
-	if (myObj.response.value == "ERRORSTOP"){
-		
-		oPLCopenState.className = "badge badge-pill badge-danger d-inline-flex align-items-center ml-3 w-20 h-50";
-		// enable the clear error button
-		document.getElementById('BtnClearErrorAxis_2').disabled = false; 
-	}
-	else{
-		oPLCopenState.className = "badge badge-pill badge-success d-inline-flex align-items-center ml-3 w-20 h-50";
-		// disable the clear error button
-		document.getElementById('BtnClearErrorAxis_2').disabled = true; 
-	}
-	
-	
-  } else { // HTTP error
-  
-    // handle error
-   // window.alert("Could not read data from AxisY: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  }
-};
-
-
-RestGetPLCOpenState_3.onload  = function() {
-  
-  // copy response object
-  myObj = RestGetPLCOpenState_3;
-	
-  if (myObj.status == 200) { // HTTP successfull response
-  
-	// update the webpage with data from the axis status
-	let oPLCopenState  = document.getElementById('Panel_State_3'); 
-	oPLCopenState.innerHTML = myObj.response.value;
-	
-	// change the color depend on the axis state
-	if (myObj.response.value == "ERRORSTOP"){
-		
-		oPLCopenState.className = "badge badge-pill badge-danger d-inline-flex align-items-center ml-3 w-20 h-50";
-		// enable the clear error button
-		document.getElementById('BtnClearErrorAxis_3').disabled = false;
-	}
-	else{
-		oPLCopenState.className = "badge badge-pill badge-success d-inline-flex align-items-center ml-3 w-20 h-50";
-		// disable the clear error button
-		document.getElementById('BtnClearErrorAxis_3').disabled = true; 
-	}
-	
-  } else { // HTTP error
-  
-    // handle error
-   // window.alert("Could not read data from AxisZ: HTTPS ERROR NUMBER: " + myObj.status);
-	stopInterval_500ms();
-  } 
-};
 
 
 
@@ -681,33 +547,14 @@ oClearError.addEventListener ('click', function() {FC_ClearError(0);});
 var oClearError_Drives1  = document.getElementById('BtnClearErrorAxis_1');
 oClearError_Drives1.addEventListener ('click', function() {FC_ClearError(1);});
 
-// Button ClearError -> DRIVE 2
-var oClearError_Drives2  = document.getElementById('BtnClearErrorAxis_2');
-oClearError_Drives2.addEventListener ('click', function() {FC_ClearError(2);});
-
-// Button ClearError -> DRIVE 3
-var oClearError_Drives3  = document.getElementById('BtnClearErrorAxis_3');
-oClearError_Drives3.addEventListener ('click', function() {FC_ClearError(3);});
-
 
 function FC_ClearError(iDevice) {
 	
 	// window.alert("Function ClearError);
 	
 	if (xToken != "") {
-		
-		if (iDevice == 1){ // Drive 1
-			RestClearError.open("POST", "https://" + strIPAddress + "/automation/api/v1.0/motion/axs/AxisX/cmd/reset", true);
-			
-		} else if (iDevice == 2){ // Drive 2
-			RestClearError.open("POST", "https://" + strIPAddress + "/automation/api/v1.0/motion/axs/AxisY/cmd/reset", true);
-			
-		} else if (iDevice == 3){ // Drive 3
-			RestClearError.open("POST", "https://" + strIPAddress + "/automation/api/v1.0/motion/axs/AxisZ/cmd/reset", true);
-			
-		} else {	// CORE
-			RestClearError.open("PUT", "https://" + strIPAddress + "/automation/api/v1.0/diagnosis/clear/error", true); // PUT must be used for this command
-		}
+
+        RestClearError.open("POST", "https://" + strIPAddress + "/automation/api/v1.0/motion/axs/" + aGetConfiguredAxes[0] + "/cmd/reset", true);
 		
 		// complete the http protocol
 		RestClearError.setRequestHeader('Content-type', 'application/json');
